@@ -1,5 +1,5 @@
 var KEYS = ['c', 'd', 'e', 'f'];
-var NOTE_DURATION = 1000;
+var NOTE_DURATION = 750;
 
 // NoteBox
 //
@@ -60,6 +60,72 @@ function NoteBox(key, onClick) {
 	boxEl.addEventListener('mousedown', this.clickHandler);
 }
 
+// Nicks' Code for creating a Simon Game.
+const MAX_SEQUENCE_LENGTH = 5;
+
+function getRandomKey() {
+	return KEYS[Math.floor(Math.random() * KEYS.length)];
+}
+
+class SimonGame {
+	constructor(winCallback = () => {}, loseCallback = () => {}) {
+		this.winCallback = winCallback;
+		this.loseCallback = loseCallback;
+		this.reset();
+	}
+
+	reset() {
+		this.isStopped = false;
+		this.round = 1;
+		this.playerSequence = [];
+		this.solutionSequence = Array.from({length: MAX_SEQUENCE_LENGTH}, getRandomKey);
+	}
+
+	playCurrentSequnce() {
+		let i = 0;
+		const playingInterval = setInterval(() => {
+			notes[this.solutionSequence[i]].play();
+			i++;
+			if (i >= this.round) {
+				clearInterval(playingInterval);
+			}
+		}, NOTE_DURATION);
+	}
+
+	addPlayerKey(key) {
+		if (this.isStopped) {
+			return;
+		}
+
+		if (key !== this.solutionSequence[this.playerSequence.length]) {
+			this.loseCallback();
+			this.isStopped = true;
+			return;
+		}
+
+		this.playerSequence.push(key);
+		if (this.playerSequence.length === this.solutionSequence.length) {
+			this.winCallback();
+			this.isStopped = true;
+			return;
+		}
+
+		if (this.playerSequence.length === this.round) {
+			this.playerSequence = [];
+			this.round++;
+			setTimeout(this.playCurrentSequnce.bind(this), NOTE_DURATION * 2);
+		}
+	}
+}
+
+function win() {
+	document.getElementById('message').innerHTML = 'Congrats, you won! :)'
+}
+
+function lose() {
+	document.getElementById('message').innerHTML = 'Game Over, you lost! :('
+}
+
 // Example usage of NoteBox.
 //
 // This will create a map from key strings (i.e. 'c') to NoteBox objects so that
@@ -68,9 +134,12 @@ function NoteBox(key, onClick) {
 var notes = {};
 
 KEYS.forEach(function (key) {
-	notes[key] = new NoteBox(key);
+	notes[key] = new NoteBox(key, game.addPlayerKey.bind(game));
 });
 
-KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
-	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
-});
+// KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
+// 	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
+// });
+
+let game = new SimonGame(win, lose);
+game.playCurrentSequnce();

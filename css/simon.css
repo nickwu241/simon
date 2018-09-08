@@ -3,6 +3,12 @@ html, body {
   height: 100%;
 }
 
+/* Simon Game message */
+#message {
+  color: white;
+  text-align: center;
+}
+
 /* Container for note boxes */
 #simon {
   display: flex;
