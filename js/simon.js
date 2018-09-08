@@ -133,6 +133,8 @@ function lose() {
 // It will also demonstrate programmatically playing notes by calling play directly.
 var notes = {};
 
+let game = new SimonGame(win, lose);
+
 KEYS.forEach(function (key) {
 	notes[key] = new NoteBox(key, game.addPlayerKey.bind(game));
 });
@@ -141,5 +143,4 @@ KEYS.forEach(function (key) {
 // 	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
 // });
 
-let game = new SimonGame(win, lose);
 game.playCurrentSequnce();
